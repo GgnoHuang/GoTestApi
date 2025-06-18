@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample product CRUD API with MongoDB",
+        "description": "This is a sample product CRUD API with ",
         "title": "Product API",
         "contact": {},
         "version": "1.0"

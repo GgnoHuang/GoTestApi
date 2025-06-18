@@ -1,69 +1,34 @@
 package config
 
 import (
-	"context"
+	"database/sql"
+	"fmt"
 	"log"
-	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	_ "github.com/lib/pq" // 匿名匯入 PostgreSQL 驅動，觸發初始化
 )
 
-var DB *mongo.Database
+// InitDB 初始化資料庫連線
+func InitDB() (*sql.DB, error) {
+	connStr := "user=jondb_user password=2xyCmsk8tPHtbB4kgEtHkykem4S1g0Uw dbname=jondb host=dpg-d18k7smmcj7s73a31b20-a.singapore-postgres.render.com port=5432 sslmode=require"
 
-// ConnectDB 連接到 MongoDB
-func ConnectDB() {
-	log.Println("=== MongoDB 連接檢查開始 ===")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// 連接到 MongoDB
-	log.Printf("正在嘗試連接到 MongoDB: mongodb://localhost:27017")
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	// 打開資料庫連線（這邊不會馬上連線）
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("MongoDB 連接失敗:", err)
+		return nil, fmt.Errorf("無法連線到資料庫: %v", err)
 	}
 
-	// 檢查連接
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		log.Fatal("MongoDB Ping 失敗:", err)
+	// 用 Ping 測試連線是否正常（這才是實際連線動作）
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("資料庫連線測試失敗: %v", err)
 	}
 
-	DB = client.Database("product_db")
-	log.Printf("已選擇數據庫: product_db")
+	fmt.Println("✅ 成功連接到 PostgreSQL!")
+	return db, nil
+}
 
-	// 列出所有數據庫
-	dbs, err := client.ListDatabaseNames(ctx, bson.M{})
+func checkErr(err error) {
 	if err != nil {
-		log.Printf("警告：無法列出數據庫列表: %v", err)
-	} else {
-		log.Printf("可用的數據庫列表: %v", dbs)
+		log.Fatal("錯誤：", err)
 	}
-
-	// 檢查集合
-	collections, err := DB.ListCollectionNames(ctx, bson.M{})
-	if err != nil {
-		log.Printf("警告：無法列出集合: %v", err)
-	} else {
-		log.Printf("product_db 中的集合: %v", collections)
-	}
-
-	// 嘗試創建一個測試文檔
-	_, err = DB.Collection("products").InsertOne(ctx, bson.M{"_test": "connectivity_test"})
-	if err != nil {
-		log.Printf("警告：無法創建測試文檔: %v", err)
-	} else {
-		// 清理測試文檔
-		_, err = DB.Collection("products").DeleteOne(ctx, bson.M{"_test": "connectivity_test"})
-		if err != nil {
-			log.Printf("警告：無法刪除測試文檔: %v", err)
-		}
-		log.Println("數據庫寫入測試成功")
-	}
-
-	log.Println("=== MongoDB 連接檢查完成 ===")
-	log.Println("MongoDB 連接成功並可以正常操作!")
 }

@@ -302,7 +302,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Product API",
-	Description:      "This is a sample product CRUD API with MongoDB",
+	Description:      "This is a sample product CRUD API with ",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,11 +1,11 @@
-# Go CRUD API with MongoDB and Swagger
+# Go CRUD API with  and Swagger
 
-這是一個使用 Go 語言開發的 RESTful API 示例，使用 MongoDB 作為數據庫，並集成了 Swagger 文檔。
+這是一個使用 Go 語言開發的 RESTful API 示例，使用  作為數據庫，並集成了 Swagger 文檔。
 
 ## 功能特點
 
 - 完整的 CRUD 操作
-- MongoDB 數據庫集成
+-  數據庫集成
 - Swagger API 文檔
 - RESTful API 設計
 - Gin Web 框架
@@ -13,7 +13,6 @@
 ## 前置要求
 
 - Go 1.21 或更高版本
-- MongoDB 運行在 localhost:27017
 - Git
 
 ## 安裝步驟
@@ -54,6 +53,6 @@ go run main.go
 ## 數據庫配置
 
 默認配置：
-- 數據庫 URL：mongodb://localhost:27017
+- 數據庫 URL：
 - 數據庫名稱：product_db
 - 集合名稱：products 

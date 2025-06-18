@@ -29,7 +29,7 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: This is a sample product CRUD API with MongoDB
+  description: This is a sample product CRUD API with 
   title: Product API
   version: "1.0"
 paths:

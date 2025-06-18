@@ -1,7 +1,7 @@
+//go:generate swag init
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -13,71 +13,84 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title           Product API
+// @title           字串 API
 // @version         1.0
+// @description     最小可行性字串 API，支援 GET/POST 並有 Swagger 文件
 // @host            localhost:8080
-// @BasePath        /api/v1
-func main() {
-	fmt.Println("Hello, World!")
+// @BasePath        /
 
-	// 初始化 Swagger 文檔
-	docs.SwaggerInfo.Title = "Product API"
-	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8080"
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	docs.SwaggerInfo.Schemes = []string{"http", "https"}
-
-	// 連接數據庫
+// GetString godoc
+// @Summary      取得最新字串
+// @Description  取得資料庫中最新一筆字串
+// @Tags         string
+// @Success      200  {string}  string  "最新字串"
+// @Router       /string [get]
+func GetString(c *gin.Context) {
 	db, err := config.InitDB()
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "資料庫連線失敗"})
+		return
 	}
 	defer db.Close()
 
-	log.Println("✅ 成功連接到 PostgreSQL!")
+	var s string
+	err = db.QueryRow("SELECT value FROM simple_strings ORDER BY id DESC LIMIT 1").Scan(&s)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "查無資料"})
+		return
+	}
+	c.String(http.StatusOK, s)
+}
 
-	// 創建 Gin 路由
+// PostString godoc
+// @Summary      儲存字串
+// @Description  儲存一個新的字串到資料庫
+// @Tags         string
+// @Accept       plain
+// @Produce      json
+// @Param        data  body  string  true  "字串內容"
+// @Success      200   {object}  map[string]string
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /string [post]
+func PostString(c *gin.Context) {
+	data, err := c.GetRawData()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "讀取失敗"})
+		return
+	}
+	str := string(data)
+
+	db, err := config.InitDB()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "資料庫連線失敗"})
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("INSERT INTO simple_strings (value) VALUES ($1)", str)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "資料庫儲存失敗"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "儲存成功"})
+}
+
+func main() {
+	// 初始化 Swagger 文檔
+	docs.SwaggerInfo.Title = "字串 API"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
+
 	r := gin.Default()
 
-	// 添加日誌中間件
-	r.Use(gin.Logger())
-
-	// 添加一個測試路由
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "API 服務器正在運行",
-		})
-	})
-
-	// API 路由
-	// api := r.Group("/api")
-	// v1 := api.Group("/v1")
-	// {
-	// 產品路由
-	// products := v1.Group("/products")
-	// {
-	// 	products.POST("", handlers.CreateProduct)
-
-	// }
-
-	// v1.POST("/strings", handlers.PostString)
-	// v1.GET("/strings", handlers.GetAllStrings)
-
-	// // 測試路由
-	// v1.GET("/test", func(c *gin.Context) {
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"message": "API v1 測試端點正常",
-	// 	})
-	// })
-	// }
-
-	// Swagger 文檔路由
+	r.GET("/string", GetString)
+	r.POST("/string", PostString)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 打印所有註冊的路由
-	log.Println("=== 註冊的路由 ===")
-
-	// 啟動服務器
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}

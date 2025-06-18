@@ -15,221 +15,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/products": {
+        "/string": {
             "get": {
-                "description": "獲取所有產品列表",
-                "produces": [
-                    "application/json"
-                ],
+                "description": "取得資料庫中最新一筆字串",
                 "tags": [
-                    "products"
+                    "string"
                 ],
-                "summary": "獲取所有產品",
+                "summary": "取得最新字串",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "最新字串",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Product"
-                            }
+                            "type": "string"
                         }
                     }
                 }
             },
             "post": {
-                "description": "創建一個新的產品",
+                "description": "儲存一個新的字串到資料庫",
                 "consumes": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "products"
-                ],
-                "summary": "創建新產品",
-                "parameters": [
-                    {
-                        "description": "產品信息",
-                        "name": "product",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Product"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Product"
-                        }
-                    }
-                }
-            }
-        },
-        "/products/{id}": {
-            "get": {
-                "description": "通過ID獲取產品",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "獲取單個產品",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "產品ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Product"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "通過ID更新產品",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "更新產品",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "產品ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "產品信息",
-                        "name": "product",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Product"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Product"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "通過ID刪除產品",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "刪除產品",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "產品ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/strings": {
-            "get": {
-                "description": "取得所有已儲存的字串資料",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "strings"
-                ],
-                "summary": "取得所有字串",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.SimpleString"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "儲存一段使用者提供的字串",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "strings"
+                    "string"
                 ],
                 "summary": "儲存字串",
                 "parameters": [
                     {
-                        "description": "字串內容（{ \\",
-                        "name": "string",
+                        "description": "字串內容",
+                        "name": "data",
                         "in": "body",
                         "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
                             }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.SimpleString"
                         }
                     },
                     "400": {
@@ -253,45 +85,6 @@ const docTemplate = `{
                 }
             }
         }
-    },
-    "definitions": {
-        "models.Product": {
-            "description": "產品信息",
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "example": "這是一個測試產品的描述"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "507f1f77bcf86cd799439011"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "測試產品"
-                },
-                "price": {
-                    "type": "number",
-                    "example": 99.99
-                },
-                "quantity": {
-                    "type": "integer",
-                    "example": 100
-                }
-            }
-        },
-        "models.SimpleString": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        }
     }
 }`
 
@@ -299,10 +92,10 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Product API",
-	Description:      "This is a sample product CRUD API with ",
+	Title:            "字串 API",
+	Description:      "最小可行性字串 API，支援 GET/POST 並有 Swagger 文件",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

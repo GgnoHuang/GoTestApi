@@ -1,180 +1,42 @@
-basePath: /api/v1
-definitions:
-  models.Product:
-    description: 產品信息
-    properties:
-      description:
-        example: 這是一個測試產品的描述
-        type: string
-      id:
-        example: 507f1f77bcf86cd799439011
-        type: string
-      name:
-        example: 測試產品
-        type: string
-      price:
-        example: 99.99
-        type: number
-      quantity:
-        example: 100
-        type: integer
-    type: object
-  models.SimpleString:
-    properties:
-      id:
-        type: string
-      value:
-        type: string
-    type: object
+basePath: /
 host: localhost:8080
 info:
   contact: {}
-  description: This is a sample product CRUD API with 
-  title: Product API
+  description: 最小可行性字串 API，支援 GET/POST 並有 Swagger 文件
+  title: 字串 API
   version: "1.0"
 paths:
-  /products:
+  /string:
     get:
-      description: 獲取所有產品列表
-      produces:
-      - application/json
+      description: 取得資料庫中最新一筆字串
       responses:
         "200":
-          description: OK
+          description: 最新字串
           schema:
-            items:
-              $ref: '#/definitions/models.Product'
-            type: array
-      summary: 獲取所有產品
-      tags:
-      - products
-    post:
-      consumes:
-      - application/json
-      description: 創建一個新的產品
-      parameters:
-      - description: 產品信息
-        in: body
-        name: product
-        required: true
-        schema:
-          $ref: '#/definitions/models.Product'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.Product'
-      summary: 創建新產品
-      tags:
-      - products
-  /products/{id}:
-    delete:
-      description: 通過ID刪除產品
-      parameters:
-      - description: 產品ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 刪除產品
-      tags:
-      - products
-    get:
-      description: 通過ID獲取產品
-      parameters:
-      - description: 產品ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Product'
-      summary: 獲取單個產品
-      tags:
-      - products
-    put:
-      consumes:
-      - application/json
-      description: 通過ID更新產品
-      parameters:
-      - description: 產品ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: 產品信息
-        in: body
-        name: product
-        required: true
-        schema:
-          $ref: '#/definitions/models.Product'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Product'
-      summary: 更新產品
-      tags:
-      - products
-  /strings:
-    get:
-      description: 取得所有已儲存的字串資料
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.SimpleString'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 取得所有字串
-      tags:
-      - strings
-    post:
-      consumes:
-      - application/json
-      description: 儲存一段使用者提供的字串
-      parameters:
-      - description: 字串內容（{ \
-        in: body
-        name: string
-        required: true
-        schema:
-          additionalProperties:
             type: string
-          type: object
+      summary: 取得最新字串
+      tags:
+      - string
+    post:
+      consumes:
+      - text/plain
+      description: 儲存一個新的字串到資料庫
+      parameters:
+      - description: 字串內容
+        in: body
+        name: data
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/models.SimpleString'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -189,5 +51,5 @@ paths:
             type: object
       summary: 儲存字串
       tags:
-      - strings
+      - string
 swagger: "2.0"

@@ -80,7 +80,7 @@ func PostString(c *gin.Context) {
 
 func main() {
 
-	baseurl := os.Getenv("BASE_URL")
+	baseurl := os.Getenv("baseurl")
 	if baseurl == "" {
 		baseurl = "localhost:8080" // 預設值
 	}

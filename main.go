@@ -4,6 +4,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Jon-GranDen/crud-api/config"
 	"github.com/Jon-GranDen/crud-api/docs"
@@ -16,7 +17,7 @@ import (
 // @title           字串 API
 // @version         1.0
 // @description     最小可行性字串 API，支援 GET/POST 並有 Swagger 文件
-// @host            localhost:8080
+// @host            {{.Host}}
 // @BasePath        /
 
 // GetString godoc
@@ -78,14 +79,25 @@ func PostString(c *gin.Context) {
 }
 
 func main() {
+
+	baseurl := os.Getenv("BASE_URL")
+	if baseurl == "" {
+		baseurl = "localhost:8080" // 預設值
+	}
+
 	// 初始化 Swagger 文檔
 	docs.SwaggerInfo.Title = "字串 API"
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Host = baseurl
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "API 服務器正在運行",
+		})
+	})
 
 	r.GET("/string", GetString)
 	r.POST("/string", PostString)

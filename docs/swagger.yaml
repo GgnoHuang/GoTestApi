@@ -1,5 +1,5 @@
 basePath: /
-host: localhost:8080
+host: '{{.Host}}'
 info:
   contact: {}
   description: 最小可行性字串 API，支援 GET/POST 並有 Swagger 文件

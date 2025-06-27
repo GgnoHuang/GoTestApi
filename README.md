@@ -48,7 +48,7 @@ go run main.go
 
 ## Swagger 文檔
 
-訪問 Swagger UI：http://localhost:8080/swagger/index.html
+訪問 Swagger UI：/swagger/index.html
 
 ## 數據庫配置
 

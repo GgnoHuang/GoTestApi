@@ -4,13 +4,46 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq" // 匿名匯入 PostgreSQL 驅動，觸發初始化
 )
 
 // InitDB 初始化資料庫連線
 func InitDB() (*sql.DB, error) {
-	connStr := "user=jondb_user password=2xyCmsk8tPHtbB4kgEtHkykem4S1g0Uw dbname=jondb host=dpg-d18k7smmcj7s73a31b20-a.singapore-postgres.render.com port=5432 sslmode=require"
+	// 从环境变量获取数据库配置，如果没有则使用默认值
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "dpg-d18k7smmcj7s73a31b20-a.singapore-postgres.render.com"
+	}
+
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "5432"
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	if dbUser == "" {
+		dbUser = "jondb_user"
+	}
+
+	dbPassword := os.Getenv("DB_PASSWORD")
+	if dbPassword == "" {
+		dbPassword = "2xyCmsk8tPHtbB4kgEtHkykem4S1g0Uw"
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "jondb"
+	}
+
+	sslMode := os.Getenv("DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "require"
+	}
+
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
+		dbUser, dbPassword, dbName, dbHost, dbPort, sslMode)
 
 	// 打開資料庫連線（這邊不會馬上連線）
 	db, err := sql.Open("postgres", connStr)

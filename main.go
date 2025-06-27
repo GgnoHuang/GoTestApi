@@ -2,32 +2,55 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/Jon-GranDen/crud-api/config"
-	"github.com/Jon-GranDen/crud-api/docs"
+	_ "github.com/lib/pq"
 
+	"github.com/Jon-GranDen/crud-api/docs"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title           字串 API
-// @version         1.0
-// @description     最小可行性字串 API，支援 GET/POST 並有 Swagger 文件
-// @host            {{.Host}}
-// @BasePath        /
+// InitDB 初始化資料庫連線
+func InitDB() (*sql.DB, error) {
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
 
-// GetString godoc
-// @Summary      取得最新字串
-// @Description  取得資料庫中最新一筆字串
-// @Tags         string
-// @Success      200  {string}  string  "最新字串"
-// @Router       /string [get]
+	if host == "" {
+		host = "localhost"
+	}
+	if port == "" {
+		port = "5432"
+	}
+	if user == "" {
+		user = "postgres"
+	}
+	if password == "" {
+		password = "password"
+	}
+	if dbname == "" {
+		dbname = "postgres"
+	}
+
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname,
+	)
+
+	return sql.Open("postgres", connStr)
+}
+
+// GetString 取得最新字串
 func GetString(c *gin.Context) {
-	db, err := config.InitDB()
+	db, err := InitDB()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "資料庫連線失敗"})
 		return
@@ -43,17 +66,7 @@ func GetString(c *gin.Context) {
 	c.String(http.StatusOK, s)
 }
 
-// PostString godoc
-// @Summary      儲存字串
-// @Description  儲存一個新的字串到資料庫
-// @Tags         string
-// @Accept       plain
-// @Produce      json
-// @Param        data  body  string  true  "字串內容"
-// @Success      200   {object}  map[string]string
-// @Failure      400   {object}  map[string]string
-// @Failure      500   {object}  map[string]string
-// @Router       /string [post]
+// PostString 儲存新的字串
 func PostString(c *gin.Context) {
 	data, err := c.GetRawData()
 	if err != nil {
@@ -62,7 +75,7 @@ func PostString(c *gin.Context) {
 	}
 	str := string(data)
 
-	db, err := config.InitDB()
+	db, err := InitDB()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "資料庫連線失敗"})
 		return
@@ -79,26 +92,22 @@ func PostString(c *gin.Context) {
 }
 
 func main() {
-
-	baseurl := os.Getenv("baseurl")
-	if baseurl == "" {
-		baseurl = "localhost:8080" // 預設值
+	myHost := os.Getenv("MY_HOST")
+	if myHost == "" {
+		myHost = "localhost:8080"
 	}
 
-	// 初始化 Swagger 文檔
+	// 初始化 Swagger
 	docs.SwaggerInfo.Title = "字串 API"
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Host = baseurl
+	docs.SwaggerInfo.Host = myHost
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "API 服務器正在運行",
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "API 服務器正在運行"})
 	})
-
 	r.GET("/string", GetString)
 	r.POST("/string", PostString)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
